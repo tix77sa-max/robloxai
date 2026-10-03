@@ -11,19 +11,33 @@ app.post('/chat', async (req, res) => {
 
         const apiKey = process.env.GEMINI_API_KEY;
         
-        // استخدام النموذج المعتمد والرسمي gemini-2.5-flash
-        const geminiResponse = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-            {
-                contents: [
+        let geminiResponse;
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        // دالة إعادة محاولة تلقائية في حال حصل ضغط مؤقت 503
+        while (attempts < maxAttempts) {
+            try {
+                geminiResponse = await axios.post(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
                     {
-                        parts: [
-                            { text: `أنت مساعد خبير في تطوير ألعاب روبلوكس وتكتب أكواد Luau نظيفة واحترافية. المطور طلب منك التالي: "${userPrompt}". اكتب الكود المطلوب أو الإجابة باختصار شديد ووضوح.` }
+                        contents: [
+                            {
+                                parts: [
+                                    { text: `أنت مساعد خبير في تطوير ألعاب روبلوكس وتكتب أكواد Luau نظيفة واحترافية. المطور طلب منك التالي: "${userPrompt}". اكتب الكود المطلوب أو الإجابة باختصار شديد ووضوح.` }
+                                ]
+                            }
                         ]
                     }
-                ]
+                );
+                break; // إذا نجح الطلب اطلع من الحلقة
+            } catch (err) {
+                attempts++;
+                if (attempts >= maxAttempts) throw err;
+                console.log(`محاولة ${attempts} فشلت بسبب الضغط، جاري إعادة المحاولة...`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // انتظار ثواني قبل الإعادة
             }
-        );
+        }
 
         const aiReply = geminiResponse.data.candidates[0].content.parts[0].text;
         console.log("تم توليد الرد بنجاح من الذكاء الاصطناعي");
