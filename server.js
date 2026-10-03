@@ -11,9 +11,9 @@ app.post('/chat', async (req, res) => {
 
         const apiKey = process.env.GEMINI_API_KEY;
         
-        // الاتصال المباشر بنموذج Gemini المحدث عبر REST API
+        // استخدام نموذج gemini-2.0-flash المستقر والسريع جداً
         const geminiResponse = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
             {
                 contents: [
                     {
