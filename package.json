@@ -1,13 +1,12 @@
 {
   "name": "robloxai",
   "version": "1.0.0",
-  "description": "Roblox AI Assistant Server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "@google/genai": "latest"
+    "axios": "^1.6.8"
   }
 }
