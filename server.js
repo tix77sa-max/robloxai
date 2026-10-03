@@ -12,11 +12,11 @@ app.post('/chat', async (req, res) => {
         // مفتاح Groq
         const apiKey = process.env.GROQ_API_KEY;
         
-        // استخدام نموذج Llama 3 المفتوح والمجاني من Groq (سريع جداً وبدون حدود مزعجة)
+        // استخدام نموذج Llama 3.3 الأحدث والنشط حالياً في Groq
         const groqResponse = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
-                model: 'llama3-70b-8192',
+                model: 'llama-3.3-70b-versatile',
                 messages: [
                     {
                         role: 'system',
@@ -38,7 +38,7 @@ app.post('/chat', async (req, res) => {
         );
 
         const aiReply = groqResponse.data.choices[0].message.content;
-        console.log("تم توليد الرد بنجاح من Llama 3");
+        console.log("تم توليد الرد بنجاح من Llama 3.3");
 
         res.json({ reply: aiReply });
     } catch (error) {
