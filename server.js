@@ -9,42 +9,40 @@ app.post('/chat', async (req, res) => {
         const userPrompt = req.body.message;
         console.log("استلمت طلب من روبلوكس:", userPrompt);
 
-        const apiKey = process.env.GEMINI_API_KEY;
+        // مفتاح Groq
+        const apiKey = process.env.GROQ_API_KEY;
         
-        let geminiResponse;
-        let attempts = 0;
-        const maxAttempts = 3;
-
-        // دالة إعادة محاولة تلقائية في حال حصل ضغط مؤقت 503
-        while (attempts < maxAttempts) {
-            try {
-                geminiResponse = await axios.post(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+        // استخدام نموذج Llama 3 المفتوح والمجاني من Groq (سريع جداً وبدون حدود مزعجة)
+        const groqResponse = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
+                model: 'llama3-70b-8192',
+                messages: [
                     {
-                        contents: [
-                            {
-                                parts: [
-                                    { text: `أنت مساعد خبير في تطوير ألعاب روبلوكس وتكتب أكواد Luau نظيفة واحترافية. المطور طلب منك التالي: "${userPrompt}". اكتب الكود المطلوب أو الإجابة باختصار شديد ووضوح.` }
-                                ]
-                            }
-                        ]
+                        role: 'system',
+                        content: 'أنت مساعد خبير في تطوير ألعاب روبلوكس وتكتب أكواد Luau نظيفة واحترافية. اكتب الكود المطلوب أو الإجابة باختصار شديد ووضوح.'
+                    },
+                    {
+                        role: 'user',
+                        content: userPrompt
                     }
-                );
-                break; // إذا نجح الطلب اطلع من الحلقة
-            } catch (err) {
-                attempts++;
-                if (attempts >= maxAttempts) throw err;
-                console.log(`محاولة ${attempts} فشلت بسبب الضغط، جاري إعادة المحاولة...`);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // انتظار ثواني قبل الإعادة
+                ],
+                temperature: 0.7
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
             }
-        }
+        );
 
-        const aiReply = geminiResponse.data.candidates[0].content.parts[0].text;
-        console.log("تم توليد الرد بنجاح من الذكاء الاصطناعي");
+        const aiReply = groqResponse.data.choices[0].message.content;
+        console.log("تم توليد الرد بنجاح من Llama 3");
 
         res.json({ reply: aiReply });
     } catch (error) {
-        console.error("خطأ في الاتصال بالذكاء الاصطناعي:", error.response?.data || error.message);
+        console.error("خطأ في الاتصال بـ Groq:", error.response?.data || error.message);
         res.status(500).json({ error: 'حدث خطأ في معالجة الطلب الذكي' });
     }
 });
