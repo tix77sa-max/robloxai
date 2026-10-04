@@ -1,13 +1,6 @@
 const express = require('express');
-const Anthropic = require('@anthropic-ai/sdk');
-
 const app = express();
 app.use(express.json());
-
-// تهيئة عميل Anthropic باستخدام المتغير البيئي الآمن في Render
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
 
 app.post('/chat', async (req, res) => {
   try {
@@ -17,22 +10,36 @@ app.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'الرجاء إرسال رسالة أو طلب صالح لـ ATLAS.' });
     }
 
-    // إرسال الطلب إلى نموذج Claude
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      system: "أنت ATLAS، مساعد برمجي ذكي وخبير في هندسة الأكواد ولغة Luau وتطوير ألعاب روبلوكس. وظيفتك هي إعطاء أكواد نظيفة، دقيقة، وجاهزة للاستخدام بدون أخطاء، مع توضيح بسيط إذا لزم الأمر.",
-      messages: [
-        { role: 'user', content: userMessage }
-      ],
+    // إرسال الطلب مباشرة باستخدام fetch الداخلي لـ Node.js
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 4000,
+        system: "أنت ATLAS، مساعد برمجي ذكي وخبير في هندسة الأكواد ولغة Luau وتطوير ألعاب روبلوكس.",
+        messages: [
+          { role: 'user', content: userMessage }
+        ]
+      })
     });
 
-    // استخراج رد الذكاء الاصطناعي وإرجاعه لروبلوكس استديو
-    const replyText = response.content[0].text;
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('خطأ من Anthropic API:', data);
+      return res.status(500).json({ error: 'خطأ من مزود الذكاء الاصطناعي', details: data });
+    }
+
+    const replyText = data.content[0].text;
     res.json({ reply: replyText });
 
   } catch (error) {
-    console.error('خطأ في الاتصال بـ Claude API:', error);
+    console.error('خطأ في السيرفر:', error);
     res.status(500).json({ error: 'حدث خطأ داخلي في سيرفر ATLAS.', details: error.message });
   }
 });
