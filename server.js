@@ -10,7 +10,6 @@ app.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'الرجاء إرسال رسالة أو طلب صالح لـ ATLAS.' });
     }
 
-    // إرسال الطلب مباشرة باستخدام fetch الداخلي لـ Node.js
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -19,7 +18,7 @@ app.post('/chat', async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-3-haiku-20240307', // تم تغيير الموديل هنا إلى موديل مدعوم ومضمون
         max_tokens: 4000,
         system: "أنت ATLAS، مساعد برمجي ذكي وخبير في هندسة الأكواد ولغة Luau وتطوير ألعاب روبلوكس.",
         messages: [
