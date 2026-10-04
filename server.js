@@ -17,7 +17,7 @@ app.post('/chat', async (req, res) => {
     }
 
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-latest',
       max_tokens: 4000,
       system: "أنت ATLAS، مساعد برمجي ذكي وخبير في هندسة الأكواد ولغة Luau وتطوير ألعاب روبلوكس. وظيفتك هي إعطاء أكواد نظيفة، دقيقة، وجاهزة للاستخدام بدون أخطاء، مع توضيح بسيط إذا لزم الأمر.",
       messages: [
