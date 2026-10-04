@@ -18,7 +18,7 @@ app.post('/chat', async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: model: 'claude-5', // تم تغيير الموديل هنا إلى موديل مدعوم ومضمون
+        model: 'claude-5', // الموديل المتوافق مع مفتاحك الجديد
         max_tokens: 4000,
         system: "أنت ATLAS، مساعد برمجي ذكي وخبير في هندسة الأكواد ولغة Luau وتطوير ألعاب روبلوكس.",
         messages: [
